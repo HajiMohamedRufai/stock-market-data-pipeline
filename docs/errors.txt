@@ -1,0 +1,10 @@
+# if spark container fails to load - go into their respective directories and run
+docker build . -t airflow/spark-master
+docker build . -t airflow/spark-master
+# then go and write : astro dev start
+
+############################################################################################
+Stock_market DAG
+
+
+

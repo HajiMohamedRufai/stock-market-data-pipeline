@@ -1,0 +1,49 @@
+# To have airflow running we need 4 containers which are created by astronomer
+1. Scheduler (heart of airflow) - for timing and scheduling of tasks
+2. Postgres - airflow meta database
+3. Triggerer: starts the process
+    Executor - defines how and on which system to execute tasks 
+    eg Local Executor, Celery Executor, Kubernetes Executor execute
+
+    Worker - Dedicated machine (in our case our is the Docker container) that executes the task
+
+4. WebServer - for serving our airflow web UI
+
+
+# To have spark running in docker, we need these containers
+1. spark-master
+2. spark-worker
+
+# We need docker-proxy container
+docker-proxy
+
+# We need minio container
+minio
+
+# We need metabase container
+metabase
+
+
+########################################################################################################################
+
+# We use alpine/socat image for docker-proxy container
+
+########################################################################################################################
+########################################################################################################################
+
+docker ps
+CONTAINER ID   IMAGE                                      COMMAND                  CREATED         STATUS                          PORTS                                                      NAMES
+bfde69580dff   astro-airflow_e7909e/airflow:latest        "tini -- /entrypoint…"   6 minutes ago   Up About a minute (unhealthy)   127.0.0.1:8080->8080/tcp                                   astro-airflow_e7909e-webserver-1
+18fc08855e26   astro-airflow_e7909e/airflow:latest        "tini -- /entrypoint…"   6 minutes ago   Up 6 minutes                                                                               astro-airflow_e7909e-scheduler-1
+9475810a781d   astro-airflow_e7909e/airflow:latest        "tini -- /entrypoint…"   6 minutes ago   Up 4 minutes                                                                               astro-airflow_e7909e-triggerer-1
+aab2773e189f   airflow/spark-worker                       "/bin/bash /worker.sh"   2 hours ago     Up 6 minutes                    0.0.0.0:8081->8081/tcp                                     spark-worker
+12121536a0d8   postgres:12.6                              "docker-entrypoint.s…"   2 hours ago     Up 6 minutes                    127.0.0.1:5432->5432/tcp                                   astro-airflow_e7909e-postgres-1
+66fd7394721a   metabase/metabase:v0.50.4                  "/app/run_metabase.sh"   2 hours ago     Up 6 minutes                    0.0.0.0:3000->3000/tcp                                     astro-airflow_e7909e-metabase-1
+c8aa42055272   minio/minio:RELEASE.2024-06-13T22-53-53Z   "/usr/bin/docker-ent…"   2 hours ago     Up 6 minutes (healthy)          0.0.0.0:9000-9001->9000-9001/tcp                           minio
+131c86fc962c   alpine/socat                               "socat TCP4-LISTEN:2…"   2 hours ago     Up 6 minutes                    0.0.0.0:2376->2375/tcp                                     astro-airflow_e7909e-docker-proxy-1
+195a598b70df   airflow/spark-master                       "/bin/bash /master.sh"   2 hours ago     Up 6 minutes                    6066/tcp, 0.0.0.0:7077->7077/tcp, 0.0.0.0:8082->8080/tcp   spark-master
+
+# format the output of docker containers
+# Default docker ps
+docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Command}}\t{{.CreatedAt}}\t{{.Status}}\t{{.Ports}}\t{{.Names}}"
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 

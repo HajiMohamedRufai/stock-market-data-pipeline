@@ -1,0 +1,82 @@
+NB:
+Always check the Airflow UI for errors, not VSCode or your favorite IDE, 
+since it is docker that runs your airflow not your local machine
+
+
+Using taskflow api is recommended as it simpliefies especially on tasks
+You dont need to import Operators and define task explicity, they just take the name of the function
+
+# If you dont define dag_id in the dag decorator, the dag_id will automatically have the name of the function
+
+NB: 
+How Airflow runs in datetime?
+Data interval
+start_date + interval = end_date
+
+start_date == logical date
+end_date == started date (Actual running of the pipeline which is supposed to run for the logical date ie for previos interval)
+
+##################################################################
+
+You can mix "CLASSIC OPERATORS" (with DAG(): ) eg
+    with DAG(
+        dag_id="pre_taskflow",
+        start_date=datetime(2024, 1, 1),
+        schedule_interval="@daily",
+        catchup=False,
+        tags=['pre_taskflow']
+    ):
+        task_a = PythonOperator(
+            task_id="task_a",
+            python_callable=_task_a  # should have defined _task_a function
+        )
+
+with "TASKFLOW DECORATORS" (@dag():) eg
+    @dag(
+        dag_id="taskflow_v0.10",
+        # start_date = logical_date
+        # actual start_date = logical_date + interval
+        start_date=datetime(2024, 6, 21, 5, 30, 0),  # 5 AM UTC = 8 am Local Tome
+
+        # schedule_interval="@daily",
+        schedule_interval="* * * * *",  # everyminute
+        catchup=True,
+        tags=['taskflow']
+    )
+    def taskflow():
+        @task
+        def task_a():
+            print("Task A")
+            return 26
+
+####################################################################################################################################
+
+Hook is just an interface that has a class to make things easier for connection.
+
+Taskflow decorators @task - needs to be called whereas classical Operators - do not need to be called
+
+OPtional Keyword arguements, opkwargs in classical Operators will serve as arguements
+
+You can mix taskflow decorator with classical Operators,  but try to use one - recommended
+
+response.json() - dot json parses the return json object to python dicitionary
+    eg null in json is parsed as None in python, json strictlys uses double quote
+
+####################################################################################################################################
+
+json.dumps() - converts a  python object to JSON string
+json.dump() - python object into a JSON formated FILE
+eg
+    import json
+
+    data = {'name': 'John', 'age': 30, 'city': 'New York'}
+
+    # Writing JSON data to a file
+    with open('data.json', 'w') as f:
+        json.dump(data, f, indent=4)
+
+json.loads() - convert JSON formated strings to  Python dicitionary
+json.load() - reads JSON data from a file and converts it into a python dictionary 
+
+json dumps (python Object -> string) has the argument, "ensure_ascii"=True/False  
+while json loads ( String -> python Object) DOES NOT have - since already goood 
