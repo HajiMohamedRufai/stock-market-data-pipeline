@@ -39,16 +39,5 @@ This project showcases expertise in containerization, real-time data ingestion, 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-   © Haji Rufai
+## Copyright
+2024 © Haji Rufai
